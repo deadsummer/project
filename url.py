@@ -109,3 +109,5 @@ M=prop_r_r-low_rank_approx(A=prop_r_r,r=20)
 			
 for i,j in zip(*np.where(M>=(0.002))):
 	f.write(roots[i]+"  "+roots[j]+"\n")
+	
+	#bitch!
