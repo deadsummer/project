@@ -1,0 +1,16 @@
+conn=sqlite3.connect("mydb.s3db");
+# Создали объект соединения
+cur=conn.cursor();
+# Создали курсор который работает с одним соединением ( не обязатльно)
+CREATE TABLE books (
+id INTEGER PRIMARY KEY,
+author TEXT,
+title TEXT);
+
+# бывают типы NULL, INTEGER, FLOAT, TEXT(=str), BLOB(=bytes)
+
+.dump books
+.schema books
+ 
+INSERT INTO books (author,title)
+VALUES('Petrovic', 'matanaliz')
