@@ -58,7 +58,7 @@ def parser2 (link0,links,n):
 		links=parser2(x,links,n)
 	return links
 	
-start_page='https://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D1%82%D0%B5%D0%B3%D0%BE%D1%80%D0%B8%D1%8F:%D0%9F%D0%BE%D1%8D%D1%82%D1%8B_%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8_XVIII_%D0%B2%D0%B5%D0%BA%D0%B0'
+start_page='https://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D1%82%D0%B5%D0%B3%D0%BE%D1%80%D0%B8%D1%8F:%D0%9F%D0%BE%D1%8D%D1%82%D0%B5%D1%81%D1%81%D1%8B_%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9_%D0%B8%D0%BC%D0%BF%D0%B5%D1%80%D0%B8%D0%B8'
 print("Making links")
 links=[]
 text=""
@@ -90,7 +90,7 @@ for x in s_w_roots:
 print("List of roots built\nMaking normal list without repits")		
 roots=[]
 roots=set(roots1)
-	
+roots=list(roots)
 n_roots=len(roots)
 print("Done "+str(n_roots)+" roots\nMaking matrix")
 
@@ -110,7 +110,7 @@ prop_r_r = np.array(prop_r_r,dtype=np.float)
 print(prop_r_r.shape)
 prop_r_r/=total_pairs
 
-print("Done\nprinting popular words")
+print("Done "+str(total_pairs)+" total pairs\nprinting popular words")
 #for i in range(n_roots):
 #	for j in range(n_roots):
 #		if prop_r_r[i][j]>0.001:
@@ -127,9 +127,9 @@ def low_rank_approx(A=None, r=1):
 
 	return(np.dot(A,svd.components_))
 	
-M=prop_r_r-low_rank_approx(A=prop_r_r,r=math.ceil(total_pairs/1000)	)	
+M=prop_r_r-low_rank_approx(A=prop_r_r,r=math.ceil(total_pairs/10)	)	
 print("Done\nprinting phrases")
-for i,j in zip(*np.where(M>=(M.max()/4))):
+for i,j in zip(*np.where(M>=((0.93*M.max())))):
 	f.write(roots[i]+"  "+roots[j]+"\n")
 	
 	#bitch!
