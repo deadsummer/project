@@ -121,8 +121,6 @@ for i in range(n_roots):
 			f.write(roots[j])
 			f.write("\n")
 f.write("\n---------\n")
-prop_r_r=[[1,3,3,4,50],[2,4,-6,8,10],[10,10,30,-40,50],[1,40,3,4,5]]
-prop_r_r = np.array(prop_r_r,dtype=np.float)
 
 def low_rank_approx(A=None, r=1):
 	from sklearn.decomposition import TruncatedSVD
