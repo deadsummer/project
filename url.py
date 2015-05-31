@@ -5,7 +5,7 @@ import codecs
 import text_analysis as txtan
 import numpy as np
 import scipy
-
+import math as math
 
 import numpy as np
 import scipy.sparse as sp
@@ -27,44 +27,54 @@ def GetURL(url):
     return s
  
 
-start_page='https://ru.wikipedia.org/wiki/%D0%9F%D1%83%D1%88%D0%BA%D0%B8%D0%BD,_%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80_%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B5%D0%B2%D0%B8%D1%87'
-
 def parser1 (link, text):
 	s = BeautifulSoup(GetURL(link))
+	nodispclass={"gallerytext","magnify","reference","mw-editsection","display:none","infobox vcard"}
+	nodispid={"toc"}
 	content=s.find(id="mw-content-text")
-	for x in content.find_all(class_="reference"):
-		x.extract()
-	for x in content.find_all(class_="mw-editsection"):
-		x.extract()
-	for x in content.find_all(style="display:none"):
-		x.extract()
-	for x in content.find_all(id="toc"):
-		x.extract()
-	for x in content.find_all(class_="infobox vcard"):
-		x.extract()
+	for y in nodispclass:
+		for x in content.find_all(class_=y):
+			x.extract()
+	for y in nodispid:
+		for x in content.find_all(id=y):
+			x.extract()
+			
 	text=text+"\n"+content.get_text()
 	return text
 	
-def parser2 (content,links):
-	a=content.findAll('a')
-	for x in a:
-		links.append("http://ru.wikipedia.org"+x['href'])
-	n=0
-	if input()=="g":
-		print(len(links))
-		n=n+1
-		s = BeautifulSoup(GetURL(links[n]))
-		content=s.find(id="mw-content-text")
-		links=parser2(content,links)
-	else:
-		return(links)
+def parser2 (link0,links):
+	soup = BeautifulSoup(GetURL(link0))
+	CatItems=soup.findAll(class_="CategoryTreeItem")
+	f.write(str(CatItems))
+	f.write("\n")
+	catlinks=[]
+	for x in CatItems:
+		catlinks.append("http://ru.wikipedia.org"+x.find('a')['href'])
+	f.write(str(catlinks))
+	f.write("\n")
+	Items=soup.find(class_="mw-category")
+	f.write(str(Items))
+	f.write("\n")
+	print(type(Items))
+	if Items!=None:
+		a=Items.findAll('a')
+		for x in a:
+			links.append("http://ru.wikipedia.org"+x['href'])
+	f.write(str(links))
+	f.write("\n")
+	for x in catlinks:
+		links=parser2(x,links)
+	return links
+	
+start_page='http://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D1%82%D0%B5%D0%B3%D0%BE%D1%80%D0%B8%D1%8F:%D0%A2%D0%B5%D0%BE%D1%80%D0%B5%D0%BC%D1%8B_%D0%B3%D0%B5%D0%BE%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%B8'
 
-soup = BeautifulSoup(GetURL(start_page))
-content=soup.find(id="mw-content-text")
-links=['https://ru.wikipedia.org/wiki/%D0%9B%D0%B5%D1%80%D0%BC%D0%BE%D0%BD%D1%82%D0%BE%D0%B2,_%D0%9C%D0%B8%D1%85%D0%B0%D0%B8%D0%BB_%D0%AE%D1%80%D1%8C%D0%B5%D0%B2%D0%B8%D1%87','https://ru.wikipedia.org/wiki/%D0%9F%D1%83%D1%88%D0%BA%D0%B8%D0%BD,_%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80_%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B5%D0%B2%D0%B8%D1%87']
+links=[]
 text=""
-#links=parser2(content, links)
-#print(links)
+links=parser2(start_page, links)
+f.write("\n----------\n")
+f.write(str(links))
+print(len(links))
+input()
 for x in links:
 	text=parser1(x,text)
 w.write(text)
@@ -129,7 +139,7 @@ def low_rank_approx(A=None, r=1):
 
 	return(np.dot(A,svd.components_))
 	
-M=prop_r_r-low_rank_approx(A=prop_r_r,r=1)		
+M=prop_r_r-low_rank_approx(A=prop_r_r,r=math.ceil(total_pairs/1000)	)	
 for i,j in zip(*np.where(M>=(M.max()/2))):
 	f.write(roots[i]+"  "+roots[j]+"\n")
 	
