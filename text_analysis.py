@@ -229,7 +229,7 @@ def split_sent_simple(string):
 
 	j=0
 	while j < len(words):
-		if len(words[j])<1 or words[j].isdigit() or (words[j] in ("и","a","но","за","под","на","в","у","к","до","над","от","над","до","из","для","c")):
+		if len(words[j])<1 or words[j].isdigit() or (words[j] in ("и","a","но","за","под","на","в","у","к","до","над","от","над","до","из","для","c","со")):
 			del words[j]
 		else:
 			j=j+1
