@@ -50,48 +50,58 @@ prop_r_r = np.array(prop_r_r,dtype=np.float)
 
 print("prop max = "+str(prop_r_r.max()))
 
-print("making although all elements=0")
-for i in range(n_roots):
-	for j in range(n_roots):
-		if prop_r_r[i][j]<257:
-			prop_r_r[i][j]=0	
+#print("making although all elements=0")
+#for i in range(n_roots):
+#	for j in range(n_roots):
+#		if prop_r_r[i][j]<257:
+#			prop_r_r[i][j]=0	
 
 print("Done "+str(total_pairs)+" total pairs\nsprasing matrix")
-
-prop_r_r=scipy.sparse.coo_matrix(prop_r_r)
+prop_r_r/=total_pairs
+sparse_prop=sp.csc_matrix(prop_r_r)
 
 print(prop_r_r.shape)
 print(prop_r_r)
 
-prop_r_r/=total_pairs
-
-
-print("Done\nApproxinating matrix")
+print(str(sp.isspmatrix_csc(sparse_prop)))
+print("Done\nnmaking USV")
 def low_rank_approx(A=None, r=1):
 	from sklearn.decomposition import TruncatedSVD
 	svd  =  TruncatedSVD(n_components = r,  random_state = 42)
 	A=svd.fit_transform(A)
-
-	return(np.dot(A,svd.components_))
+	A_sp=sp.csc_matrix(A)
+	B_sp=sp.csc_matrix(svd.components_)
+	print(str(sp.isspmatrix_csc(A_sp)))
+	print(str(sp.isspmatrix_csc(B_sp)))
+	return(A_sp.dot(B_sp))
 	
-M=prop_r_r-low_rank_approx(A=prop_r_r,r=10)	
+M=low_rank_approx(A=sparse_prop,r=10)
+
+print("Done\nmaking A-USV")
+Z=sparse_prop-M
+ZZ=Z.todense()
+print(ZZ)
 print("Done\nprinting phrases")
-max=M.max()
+ZZZ=ZZ.getA()
+maxx=ZZZ.max()
+print(maxx)
+print(str(sp.isspmatrix_csc(ZZ)))
 r=[0]*100
-for x in M.flat:
-	if x!=max:
-		n=math.trunc(x/max*100)
+for x in ZZZ.flat:
+	if x!=maxx:
+		n=math.trunc((x/maxx)*100)
 		r[n]=r[n]+1
 	else:
 		r[99]=r[99]+1
 res=0
-res_max=20
+res_max=200
 n=99
 while res<res_max:
 	res=res+r[n]
 	n=n-1
+print((n-1)*maxx/100)
 
-for i,j in zip(*np.where(M>=(((n-1)*max/100)))):
+for i,j in zip(*np.where(ZZZ>=(0.00054))):
 	f.write(roots[i]+"  "+roots[j]+"\n")
 	
 	#bitch!
