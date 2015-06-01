@@ -1,6 +1,4 @@
-﻿#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-import urllib.request
+﻿import urllib.request
 import codecs
 import text_analysis as txtan
 import numpy as np
@@ -29,7 +27,7 @@ class max_n:
 		if i<len(self.m_poses):
 			return self.m_array[i]
 			
-def low_rank_approx(P=None, r=1):
+def low_rank_approx(P=None, r=1,n=5):
 		A=sp.csc_matrix(P)
 		from sklearn.decomposition import TruncatedSVD
 		svd  =  TruncatedSVD(n_components = r,  random_state = 42)
@@ -39,15 +37,15 @@ def low_rank_approx(P=None, r=1):
 		print(B[1,:])
 		
 		indexes_max=[]
-		for i in range(n_roots):
-			a=[[0]*2 for i in range(n_roots)]
+		for i in range(n):
+			a=[[0]*2 for i in range(n)]
 			line=max_n()
 			line.init(5)
-			for j in range(n_roots):
+			for j in range(n):
 				line.add(P[i][j]-np.dot(C[i,:],B[:,j]),j)
 			for k in range(5):
 				indexes_max.append([i,line.get_i_pos(k),line.get_i_value(k)])
-			print(str(i)+" from "+str(n_roots)+" string made")
+			print(str(i)+" from "+str(n)+" string made")
 		return indexes_max
 		
 def sort_by(arr, axe):
@@ -59,7 +57,7 @@ def sort_by(arr, axe):
 			i -= 1
 		return(arr)
 			
-def analis:
+def analis():
 	w = codecs.open('wiki.txt','r', encoding='utf-8')
 	f = codecs.open('words.txt','w', encoding='utf-8')
 
@@ -123,7 +121,7 @@ def analis:
 	print("Done\nnmaking USV")
 			
 		
-	indexes_max=low_rank_approx(P=prop_r_r,r=10)
+	indexes_max=low_rank_approx(P=prop_r_r,r=10,n=n_roots)
 	indexes_max=sort_by(indexes_max,2)
 	best_indexes_max=indexes_max[0:50]
 	print(len(indexes_max))
@@ -153,13 +151,13 @@ def analis:
 	#print((n-1)*maxx/100)
 	#
 	final=[]
-	w=0
+	ii=0
 	for i,j,k in best_indexes_max:
+		final.append([])
 		out=set()
-		final[w]=[]
 		for s in range(len(word_root)):
 			if word_root[s][1]==roots[i] and word_root[s+1][1]==roots[j] and (word_root[s][0]+word_root[s+1][0]) not in out:
 				out.add(word_root[s][0]+word_root[s+1][0])
-				final[w].append(word_root[s][0]+"  "+word_root[s+1][0]+"\n")
-		w+=1
-	return w
+				final[ii].append(word_root[s][0]+"  "+word_root[s+1][0])
+		ii+=1
+	return final

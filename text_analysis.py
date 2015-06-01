@@ -179,6 +179,8 @@ def one_similar(words, basis):
 
 def split_text(string):
 	string=string.replace("\n",".")
+	string=string.replace(",",".")
+	string=string.replace(":",".")
 	s=[]
 	k1=0
 	start=0
@@ -229,7 +231,7 @@ def split_sent_simple(string):
 
 	j=0
 	while j < len(words):
-		if len(words[j])<1 or words[j].isdigit() or (words[j] in ("и","a","но","за","под","на","в","у","к","до","над","от","над","до","из","для","c","со","о")):
+		if len(words[j])<1 or words[j].isdigit() or (words[j] in ("и","a","но","за","под","на","в","у","к","до","над","от","над","до","из","для","c","со","о","ко","кроме","по","ни","где","когда")):
 			del words[j]
 		else:
 			j=j+1

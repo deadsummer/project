@@ -11,6 +11,24 @@ import numpy as np
 import scipy.sparse as sp
 
 
+class max_n:
+	m_array=[]
+	m_poses=[]
+	def init(self,n):
+		self.m_array=[0]*n
+		self.m_poses=[0]*n
+	def add(self,a,pos):
+		for i in range(len(self.m_array)):
+			if a>self.m_array[i]:
+				self.m_array[i], a = a, self.m_array[i]
+				self.m_poses[i], pos = pos, self.m_poses[i]
+	def get_i_pos(self,i):
+		if i<len(self.m_poses):
+			return self.m_poses[i]
+	def get_i_value(self,i):
+		if i<len(self.m_poses):
+			return self.m_array[i]
+
 w = codecs.open('wiki.txt','r', encoding='utf-8')
 f = codecs.open('words.txt','w', encoding='utf-8')
 
@@ -22,8 +40,15 @@ s_w=[]
 for x in sent:
 	s_w.append(txtan.split_sent_simple(x))
 	
+
+	
 s_w_roots=list(map(lambda x: list(map(txtan.stem,x)), s_w))
 
+word_root=[]
+for i in range(len(s_w_roots)):
+	for k in range(len(s_w_roots[i])):
+		word_root.append([s_w[i][k],s_w_roots[i][k]])
+		
 roots1=[]
 for x in s_w_roots:
 	for k in x:
@@ -65,43 +90,70 @@ print(prop_r_r)
 
 print(str(sp.isspmatrix_csc(sparse_prop)))
 print("Done\nnmaking USV")
-def low_rank_approx(A=None, r=1):
+def low_rank_approx(P=None, r=1):
+	A=sp.csc_matrix(P)
 	from sklearn.decomposition import TruncatedSVD
 	svd  =  TruncatedSVD(n_components = r,  random_state = 42)
-	A=svd.fit_transform(A)
-	A_sp=sp.csc_matrix(A)
-	B_sp=sp.csc_matrix(svd.components_)
-	print(str(sp.isspmatrix_csc(A_sp)))
-	print(str(sp.isspmatrix_csc(B_sp)))
-	return(A_sp.dot(B_sp))
+	C=svd.fit_transform(A)
+	B=svd.components_
+	print(C[1,:])
+	print(B[1,:])
 	
-M=low_rank_approx(A=sparse_prop,r=10)
-
-print("Done\nmaking A-USV")
-Z=sparse_prop-M
-ZZ=Z.todense()
-print(ZZ)
-print("Done\nprinting phrases")
-ZZZ=ZZ.getA()
-maxx=ZZZ.max()
-print(maxx)
-print(str(sp.isspmatrix_csc(ZZ)))
-r=[0]*100
-for x in ZZZ.flat:
-	if x!=maxx:
-		n=math.trunc((x/maxx)*100)
-		r[n]=r[n]+1
-	else:
-		r[99]=r[99]+1
-res=0
-res_max=200
-n=99
-while res<res_max:
-	res=res+r[n]
-	n=n-1
-print((n-1)*maxx/100)
-
-for i,j in zip(*np.where(ZZZ>=(0.00054))):
-	f.write(roots[i]+"  "+roots[j]+"\n")
+	indexes_max=[]
+	for i in range(n_roots):
+		a=[[0]*2 for i in range(n_roots)]
+		line=max_n()
+		line.init(5)
+		for j in range(n_roots):
+			line.add(P[i][j]-np.dot(C[i,:],B[:,j]),j)
+		for k in range(5):
+			indexes_max.append([i,line.get_i_pos(k),line.get_i_value(k)])
+		print(str(i)+" from "+str(n_roots)+" string made")
+	return indexes_max
+		
 	
+indexes_max=low_rank_approx(P=prop_r_r,r=10)
+def sort_by(arr, axe):
+	i = len(arr)
+	while i > 1:
+		for j in range(i - 1):
+			if arr[j][axe] < arr[j + 1][axe]:
+				arr[j], arr[j+1] = arr[j+1], arr[j]
+		i -= 1
+	return(arr)
+indexes_max=sort_by(indexes_max,2)
+best_indexes_max=indexes_max[0:50]
+print(len(indexes_max))
+#
+#print("Done\nmaking A-USV")
+#Z=sparse_prop-M
+#ZZ=Z.todense()
+#print(ZZ)
+#print("Done\nprinting phrases")
+#ZZZ=ZZ.getA()
+#maxx=ZZZ.max()
+#print(maxx)
+#print(str(sp.isspmatrix_csc(ZZ)))
+#r=[0]*100
+#for x in ZZZ.flat:
+#	if x!=maxx:
+#		n=math.trunc((x/maxx)*100)
+#		r[n]=r[n]+1
+#	else:
+#		r[99]=r[99]+1
+#res=0
+#res_max=200
+#n=99
+#while res<res_max:
+#	res=res+r[n]
+#	n=n-1
+#print((n-1)*maxx/100)
+#
+for i,j,k in best_indexes_max:
+	out=set()
+	for s in range(len(word_root)):
+		if word_root[s][1]==roots[i] and word_root[s+1][1]==roots[j] and (word_root[s][0]+word_root[s+1][0]) not in out:
+			out.add(word_root[s][0]+word_root[s+1][0])
+			f.write(word_root[s][0]+"  "+word_root[s+1][0]+"\n")
+f.write("--------------\n")
 	#bitch!
