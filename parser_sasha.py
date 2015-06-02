@@ -69,7 +69,3 @@ def pars(links,textbox):
 			textbox.insert(n)
 	w.write(text)
 	w.close()
-
-	
-def pizda():
-	print ("pizda")

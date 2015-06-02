@@ -58,33 +58,46 @@ def sort_by(arr, axe):
 		return(arr)
 			
 def analis():
-	w = codecs.open('wiki.txt','r', encoding='utf-8')
+	w1 = codecs.open('wiki1.txt','r', encoding='utf-8')
+	w2 = codecs.open('wiki2.txt','r', encoding='utf-8')
 	f = codecs.open('words.txt','w', encoding='utf-8')
 
-	text=w.read()
+	text1=w1.read()
+	text2=w2.read()
+	
+	sent1=txtan.split_text(text1)
+	sent2=txtan.split_text(text2)
+	
+	s_w1=[]
+	for x in sent1:
+		s_w1.append(txtan.split_sent_simple(x))
+	s_w2=[]
+	for x in sent2:
+		s_w2.append(txtan.split_sent_simple(x))
 
-	sent=txtan.split_text(text)
-
-	s_w=[]
-	for x in sent:
-		s_w.append(txtan.split_sent_simple(x))
 		
-
-		
-	s_w_roots=list(map(lambda x: list(map(txtan.stem,x)), s_w))
-
-	word_root=[]
-	for i in range(len(s_w_roots)):
-		for k in range(len(s_w_roots[i])):
-			word_root.append([s_w[i][k],s_w_roots[i][k]])
+	s_w_roots1=list(map(lambda x: list(map(txtan.stem,x)), s_w1))
+	s_w_roots2=list(map(lambda x: list(map(txtan.stem,x)), s_w2))
+	
+	word_root1=[]
+	for i in range(len(s_w_roots1)):
+		for k in range(len(s_w_roots1[i])):
+			word_root1.append([s_w1[i][k],s_w_roots1[i][k]])
+	word_root2=[]
+	for i in range(len(s_w_roots2)):
+		for k in range(len(s_w_roots2[i])):
+			word_root2.append([s_w2[i][k],s_w_roots2[i][k]])
 			
-	roots1=[]
-	for x in s_w_roots:
+	roots0=[]
+	for x in s_w_roots1:
 		for k in x:
-			roots1.append(k)
+			roots0.append(k)
+	for x in s_w_roots2:
+		for k in x:
+			roots0.append(k)
 	print("List of roots built\nMaking normal list without repits")		
 	roots=[]
-	roots=set(roots1)
+	roots=set(roots0)
 	roots=list(roots)
 	n_roots=len(roots)
 	print("Done "+str(n_roots)+" roots\nMaking matrix")
@@ -96,7 +109,11 @@ def analis():
 	prop_r_r=[[0] * n_roots for i in range(n_roots)]
 
 	total_pairs=0
-	for k in s_w_roots:
+	for k in s_w_roots1:
+		for m in range(len(k)-1):
+			prop_r_r[r2i[k[m]]][r2i[k[m+1]]]+=1
+			total_pairs+=1
+	for k in s_w_roots2:
 		for m in range(len(k)-1):
 			prop_r_r[r2i[k[m]]][r2i[k[m+1]]]+=1
 			total_pairs+=1
@@ -150,14 +167,24 @@ def analis():
 	#	n=n-1
 	#print((n-1)*maxx/100)
 	#
-	final=[]
+	final1=[]
+	final2=[]
 	ii=0
 	for i,j,k in best_indexes_max:
-		final.append([])
 		out=set()
-		for s in range(len(word_root)):
-			if word_root[s][1]==roots[i] and word_root[s+1][1]==roots[j] and (word_root[s][0]+word_root[s+1][0]) not in out:
-				out.add(word_root[s][0]+word_root[s+1][0])
-				final[ii].append(word_root[s][0]+"  "+word_root[s+1][0])
+		final1.append([])
+		for s in range(len(word_root1)-1):
+			if word_root1[s][1]==roots[i] and word_root1[s+1][1]==roots[j] and (word_root1[s][0]+word_root1[s+1][0]) not in out:
+				out.add(word_root1[s][0]+word_root1[s+1][0])
+				final1[ii].append(word_root1[s][0]+"  "+word_root1[s+1][0])
 		ii+=1
-	return final
+	ii=0
+	for i,j,k in best_indexes_max:
+		out=set()
+		final2.append([])
+		for s in range(len(word_root2)-1):
+			if word_root2[s][1]==roots[i] and word_root2[s+1][1]==roots[j] and (word_root2[s][0]+word_root2[s+1][0]) not in out:
+				out.add(word_root2[s][0]+word_root2[s+1][0])
+				final2[ii].append(word_root2[s][0]+"  "+word_root2[s+1][0])
+		ii+=1
+	return ([final1, final2])
